@@ -5,19 +5,17 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(
-  Strategy,
-  // By default the string "jwt" is passed as second argument
-  // that will be used in the controller like this:
-  // UseGuards(AuthGuard('jwt'))
-  'jwt',
-) {
+// String "jwt" is passed as second argument:
+// that can later be referenced directly in calls
+// to AuthGuard from @nestjs/passport. That created config
+// needs to be passed to @UseGuards from @nestjs/common
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     configService: ConfigService,
     private prismaService: PrismaService,
   ) {
     super({
-      // Set 'Bearer ' + <token> in Authorization header method
+      // Use the Bearer + token auth header strategy
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.get('JWT_SECRET'),
